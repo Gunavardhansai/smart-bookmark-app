@@ -152,18 +152,18 @@ export default function Home() {
 
     fetchBookmarks();
 
-    const channel = supabase
-      .channel("bookmarks-channel")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "bookmarks" },
-        () => fetchBookmarks()
-      )
-      .subscribe();
+    // const channel = supabase
+    //   .channel("bookmarks-channel")
+    //   .on(
+    //     "postgres_changes",
+    //     { event: "*", schema: "public", table: "bookmarks" },
+    //     () => fetchBookmarks()
+    //   )
+    //   .subscribe();
 
-    return () => {
-      supabase.removeChannel(channel);
-    };
+    // return () => {
+    //   supabase.removeChannel(channel);
+    // };
   }, [user]);
 
   // ---------------- LOGIN ----------------
@@ -178,29 +178,63 @@ export default function Home() {
   };
 
   // ---------------- ADD ----------------
+  // const addBookmark = async () => {
+  //   if (!title || !url) return alert("Fill all fields");
+
+  //   if (!url.startsWith("http")) {
+  //     return alert("URL must start with http or https");
+  //   }
+
+  //   await supabase.from("bookmarks").insert([
+  //     {
+  //       title,
+  //       url,
+  //       user_id: user.id,
+  //     },
+  //   ]);
+
+  //   setTitle("");
+  //   setUrl("");
+  // };
+
   const addBookmark = async () => {
-    if (!title || !url) return alert("Fill all fields");
+  if (!title || !url) return alert("Fill all fields");
 
-    if (!url.startsWith("http")) {
-      return alert("URL must start with http or https");
-    }
+  if (!url.startsWith("http")) {
+    return alert("URL must start with http or https");
+  }
 
-    await supabase.from("bookmarks").insert([
+  const { data, error } = await supabase
+    .from("bookmarks")
+    .insert([
       {
         title,
         url,
         user_id: user.id,
       },
-    ]);
+    ])
+    .select()
+    .single();
+
+  if (!error && data) {
+    setBookmarks((prev) => [data, ...prev]);
+  }
 
     setTitle("");
     setUrl("");
   };
 
+
   // ---------------- DELETE ----------------
+  // const deleteBookmark = async (id: string) => {
+  //   await supabase.from("bookmarks").delete().eq("id", id);
+  // };
   const deleteBookmark = async (id: string) => {
-    await supabase.from("bookmarks").delete().eq("id", id);
+  await supabase.from("bookmarks").delete().eq("id", id);
+
+  setBookmarks((prev) => prev.filter((b) => b.id !== id));
   };
+
 
   // ---------------- FILTER ----------------
   const filtered = bookmarks.filter((b) =>
