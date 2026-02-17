@@ -50,33 +50,15 @@ User → Next.js App → Supabase Auth → Supabase Database↓Row Level Securit
 ====================
 ```
 smart-bookmark-app/
-
-│
-
 ├── app/
-
 │ ├── layout.tsx # Root layout (theme + global structure)
-
 │ └── page.tsx # Main application logic
-
-│
-
 ├── lib/
-
 │ └── supabaseClient.ts # Supabase client initialization
-
-│
-
 ├── public/
-
-│
-
 ├── .env.local # Environment variables
-
 ├── README.md
-
 ├── package.json
-
 └── tailwind.config.ts
 ```
 
@@ -96,47 +78,33 @@ smart-bookmark-app/
     
 ```
 create extension if not exists "uuid-ossp";
-
 create table public.bookmarks (
-
 id uuid primary key default uuid\_generate\_v4(),
-
 user\_id uuid not null references auth.users(id) on delete cascade,
-
 title text not null,
-
 url text not null,
-
 created\_at timestamptz default now()
-
 );
 
 alter table public.bookmarks enable row level security;
 
 create policy "Users can view their own bookmarks"
-
 on public.bookmarks for select
-
 using (auth.uid() = user\_id);
 
 create policy "Users can insert their own bookmarks"
-
 on public.bookmarks for insert
-
 with check (auth.uid() = user\_id);
 
 create policy "Users can delete their own bookmarks"
-
 on public.bookmarks for delete
-
 using (auth.uid() = user\_id);
-
+```
 This ensures:
 
 *   Users can only see their own data
     
 *   Secure multi-user architecture
-```
 
 2️⃣ Environment Variables
 -------------------------
@@ -144,7 +112,6 @@ This ensures:
 Create .env.local:
 ```
 NEXT\_PUBLIC\_SUPABASE\_URL=your\_project\_url
-
 NEXT\_PUBLIC\_SUPABASE\_ANON\_KEY=your\_anon\_key
 ```
 
@@ -209,7 +176,6 @@ Originally attempted using:
 ```
 .on("postgres\_changes", ...)
 ```
-
 However:
 
 *   Supabase logical replication now requires a paid plan
@@ -287,9 +253,7 @@ Result:
 
 **Solution:**Redeployed project after setting:
 ```
-
 NEXT\_PUBLIC\_SUPABASE\_URL
-
 NEXT\_PUBLIC\_SUPABASE\_ANON\_KEY
 ```
 
